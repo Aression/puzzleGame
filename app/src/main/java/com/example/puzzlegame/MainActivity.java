@@ -5,6 +5,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.annotation.SuppressLint;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -13,11 +17,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.puzzlegame.databinding.ActivityMainBinding;
+import com.example.puzzlegame.models.ImagePiece;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -49,11 +54,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private final Button confirmSelection = binding.startPuzzle;
     private final Button submitPuzzle=binding.endPuzzle;
+    private final Button giveUpPuzzle=binding.giveUpGame;
     private final TextView timeCounter=binding.CounterTime;
     private final TextView resultPrinter = binding.puzzleResult;
     private final TextView infoPrinter = binding.puzzleInfo;
 
-    private int successCounter=0;
+    private byte[] nullBitmapByteArray;
+    private int lastChoseImageID;
+    private int Credits = 0;
     private boolean gameStarted = false;
     private Calendar startTime;
     private Timer timer;
@@ -82,19 +90,58 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         confirmSelection.setOnClickListener(this);
         submitPuzzle.setOnClickListener(this);
+
+        Resources res = getResources();
+        Bitmap bmp = BitmapFactory.decodeResource(res, R.drawable._null);
+        nullBitmapByteArray = ImageSplitter.Bimap2Bytes(bmp);
     }
 
     private void updateDivideImages(ImageView view){
         // 使用view对应的源图片更新拼图框内的图片
+        if(!gameStarted){
+            lastChoseImageID = (int) view.getTag();
+            Resources res = getResources();
+            Bitmap bmp = BitmapFactory.decodeResource(res, lastChoseImageID);
+            List<ImagePiece> imgPieces = ImageSplitter.split(bmp,3,3);
+            for (ImagePiece piece:imgPieces) {
+                divide.get(piece.index).setImageDrawable(new BitmapDrawable(getResources(),piece.bitmap));
+                divide.get(piece.index).setTag(ImageSplitter.Bimap2Bytes(bmp));
+            }
+        }else{
+            infoPrinter.setText("game has already started! please don't change image now.");
+        }
     }
 
-    private void checkImageViewSource(ImageView view){
+    private boolean imageNull(ImageView view){
         // 拼图框内的imageview检测自身是否已经被赋予了有效的图片
-
+        return !Arrays.equals(nullBitmapByteArray,(byte[]) view.getTag());
     }
 
     private void performPuzzleMove(ImageView view){
         // 点击拼图框内的图片时, 执行图片的移动操作
+        if(!gameStarted){
+            infoPrinter.setText("game not started! please don't solve puzzle now.");
+        }else if(!imageNull(view)){
+            // if the image is not empty, perform the move action.
+            int indNow = useLoop(divideList,view.getId());
+            int [] dirs = {-3,+3,-1,+1};
+            for (int d : dirs) {
+                int searchViewInd = indNow+d;
+                if(searchViewInd < 0 || searchViewInd > 8) continue;
+                ImageView targetView = findViewById(searchViewInd);
+                if(imageNull(targetView)){
+                    // null view set to the current bitmap
+                    targetView.setImageDrawable(
+                            new BitmapDrawable(getResources(),
+                                    ImageSplitter.Bytes2Bimap((byte[]) view.getTag())));
+                    Bitmap nullBmp = BitmapFactory.decodeResource(getResources(), R.drawable._null);
+                    // current view set to null
+                    view.setImageDrawable(
+                            new BitmapDrawable(getResources(),nullBmp));
+                }
+            }
+        }
+        // empty action if the view is already empty
     }
 
     private boolean judgePuzzleComplete(){
@@ -110,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @SuppressLint("SetTextI18n")
             public void run() {
                 Calendar now = Calendar.getInstance();
-                timeCounter.setText("当前用时: \n"
+                timeCounter.setText("time used: \n"
                         +(now.getTime().getTime()-startTime.getTime().getTime())/1000+" s");
             }
         };
@@ -127,13 +174,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             timer.cancel();
             // 打印结果
             Calendar now = Calendar.getInstance();
-            resultPrinter.setText("拼图成功! \n"+
-                    "总计用时: "+(now.getTime().getTime()-startTime.getTime().getTime())/1000+" s");
-            successCounter++;
-            infoPrinter.setText("拼图成功! 你总共拼图成功了 "+successCounter+" 次.");
+            resultPrinter.setText("puzzle success! \n"+
+                    "time used: "+(now.getTime().getTime()-startTime.getTime().getTime())/1000+" s");
+            infoPrinter.setText("puzzle success! your credit: "+ (++Credits) +".");
         }else{
-            infoPrinter.setText("拼图未成功! 请继续努力!");
+            infoPrinter.setText("puzzle not success yet!");
         }
+    }
+
+    private void giveUp(){
+        // give up this game and receive punishment
+
+        // recover image
+        Resources res = getResources();
+        Bitmap bmp = BitmapFactory.decodeResource(res, lastChoseImageID);
+        List<ImagePiece> imgPieces = ImageSplitter.split(bmp,3,3);
+        for (ImagePiece piece:imgPieces) {
+            divide.get(piece.index).setImageDrawable(new BitmapDrawable(getResources(),piece.bitmap));
+        }
+
+
+        // 清除当前状态
+        gameStarted = false;
+        // 清空计时队列
+        timer.cancel();
+        // 打印结果
+        Calendar now = Calendar.getInstance();
+        resultPrinter.setText("puzzle failed! \n"+
+                "总计用时: "+(now.getTime().getTime()-startTime.getTime().getTime())/1000+" s");
+        infoPrinter.setText("this turn of game is canceled. your credit: "+ (--Credits) +".");
     }
 
     public static int useLoop(int[] arr, int targetValue) {
@@ -149,6 +218,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int viewID = view.getId();
         if (viewID == R.id.startPuzzle) startGame();
         else if (viewID == R.id.endPuzzle) endGame();
+        else if (viewID == R.id.giveUpGame) giveUp();
         else{
             // 注意 asList方法 默认生成二维数组! e.g.: [1,2,3] --> [[1,2,3]]
             // Arrays.asList(array).contains(target);
@@ -157,8 +227,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             int divideInd = useLoop(divideList,viewID);
             if(sourceInd > 0){
                 // 点击的是source里面的图片
+                updateDivideImages(findViewById(viewID));
             }else if(divideInd >0){
                 // 点击的是拼图框里面的图片
+                performPuzzleMove(findViewById(viewID));
             }else{
                 throw new UnsupportedOperationException("not found comment id");
             }

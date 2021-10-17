@@ -5,4 +5,5 @@
     <string name="timecounter">timeCounter</string>
     <string name="puzzleResult">还没提交呢！</string>
     <string name="puzzlegameinfomation">PuzzleGameInfomation</string>
+    <string name="giveup">GiveUp</string>
 </resources>
