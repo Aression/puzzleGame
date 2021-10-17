@@ -52,9 +52,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final Button submitPuzzle=binding.endPuzzle;
     private final TextView timeCounter=binding.CounterTime;
     private final TextView resultPrinter = binding.puzzleResult;
+    private final TextView infoPrinter = binding.puzzleInfo;
 
+    private int successCounter=0;
     private boolean gameStarted = false;
     private Calendar startTime;
+    private Timer timer;
+    private TimerTask timerTask;
 
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -94,22 +98,43 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // 点击拼图框内的图片时, 执行图片的移动操作
     }
 
-    private void startGame(){
+    private boolean judgePuzzleComplete(){
+        // 点击完成拼图的时候, 判断是否执行完毕
+        return false;
+    }
 
+    private void startGame(){
+        gameStarted=true;
         startTime = Calendar.getInstance();
-        Timer timer = new Timer();
-        TimerTask task = new TimerTask(){
+        timer = new Timer();
+        timerTask = new TimerTask(){
+            @SuppressLint("SetTextI18n")
             public void run() {
                 Calendar now = Calendar.getInstance();
-                timeCounter.setText("Time spent: \n"+(now.getTime().getTime()-startTime.getTime().getTime())/1000+" s");
+                timeCounter.setText("当前用时: \n"
+                        +(now.getTime().getTime()-startTime.getTime().getTime())/1000+" s");
             }
         };
         //每过一秒获取一次当前的calendar,打印时间间隔.
-        timer.schedule (task, 1000L, 1000L);
+        timer.schedule (timerTask, 1000L, 1000L);
     }
 
+    @SuppressLint("SetTextI18n")
     private void endGame(){
-
+        if(judgePuzzleComplete()){
+            // 清除当前状态
+            gameStarted = false;
+            // 清空计时队列
+            timer.cancel();
+            // 打印结果
+            Calendar now = Calendar.getInstance();
+            resultPrinter.setText("拼图成功! \n"+
+                    "总计用时: "+(now.getTime().getTime()-startTime.getTime().getTime())/1000+" s");
+            successCounter++;
+            infoPrinter.setText("拼图成功! 你总共拼图成功了 "+successCounter+" 次.");
+        }else{
+            infoPrinter.setText("拼图未成功! 请继续努力!");
+        }
     }
 
     public static int useLoop(int[] arr, int targetValue) {
@@ -126,8 +151,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (viewID == R.id.startPuzzle) startGame();
         else if (viewID == R.id.endPuzzle) endGame();
         else{
-            // 注意 aslist默认生成二维数组! e.g.: [1,2,3] --> [[1,2,3]]
+            // 注意 asList方法 默认生成二维数组! e.g.: [1,2,3] --> [[1,2,3]]
             // Arrays.asList(array).contains(target);
+            // 这里使用循环遍历的方法查找了
             int sourceInd = useLoop(sourceList,viewID);
             int divideInd = useLoop(divideList,viewID);
             if(sourceInd > 0){
@@ -135,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }else if(divideInd >0){
                 // 点击的是拼图框里面的图片
             }else{
-                throw new UnsupportedOperationException("not found compent id");
+                throw new UnsupportedOperationException("not found comment id");
             }
         }
     }
