@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">puzzleGame</string>
+    <string name="confirmSelection" translatable="false">确认选择</string>
+    <string name="submitSelection" translatable="false">提交拼图</string>
+    <string name="timecounter">timeCounter</string>
+    <string name="puzzleResult">还没提交呢！</string>
+</resources>
