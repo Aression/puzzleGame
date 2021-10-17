@@ -14,6 +14,7 @@
         android:layout_height="20dp"
         android:layout_marginTop="367dp"
         android:text="@string/puzzleResult"
+        android:gravity="center"
         app:layout_constraintBottom_toTopOf="@+id/sourceImgContainer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.976"
@@ -42,6 +43,7 @@
                 android:id="@+id/img1"
                 android:layout_width="90dp"
                 android:layout_height="90dp"
+                android:background="#03A9F4"
                 android:clickable="true"
                 android:focusable="true"
                 android:padding="2dp"
@@ -145,6 +147,7 @@
         android:layout_height="20dp"
         android:layout_marginTop="367dp"
         android:text="@string/timecounter"
+        android:gravity="center"
         app:layout_constraintBottom_toTopOf="@+id/sourceImgContainer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.015"
@@ -156,28 +159,21 @@
         android:id="@+id/startPuzzle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="20dp"
         android:text="@string/confirmSelection"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/endPuzzle"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintBottom_toTopOf="@+id/sourceImgContainer"
+        app:layout_constraintEnd_toStartOf="@+id/giveUpGame"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/puzzleContainer"
-        app:layout_constraintVertical_bias="0.182" />
+        app:layout_constraintTop_toBottomOf="@+id/CounterTime" />
 
     <Button
         android:id="@+id/endPuzzle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
         android:text="@string/submitSelection"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/sourceImgContainer"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.949"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/puzzleContainer"
-        app:layout_constraintVertical_bias="0.182" />
+        app:layout_constraintStart_toEndOf="@+id/giveUpGame"
+        app:layout_constraintTop_toBottomOf="@+id/puzzleResult" />
 
     <TableLayout
         android:id="@+id/sourceImgContainer"
@@ -276,6 +272,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/puzzlegameinfomation"
+        android:gravity="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
@@ -291,6 +288,6 @@
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/puzzleContainer"
-        app:layout_constraintVertical_bias="0.775" />
+        app:layout_constraintVertical_bias="0.704" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

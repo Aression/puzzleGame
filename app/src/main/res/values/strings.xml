@@ -2,8 +2,8 @@
     <string name="app_name">puzzleGame</string>
     <string name="confirmSelection" translatable="false">确认选择</string>
     <string name="submitSelection" translatable="false">提交拼图</string>
-    <string name="timecounter">timeCounter</string>
-    <string name="puzzleResult">还没提交呢！</string>
-    <string name="puzzlegameinfomation">PuzzleGameInfomation</string>
-    <string name="giveup">GiveUp</string>
+    <string name="timecounter" translatable="false">timeCounter</string>
+    <string name="puzzleResult" translatable="false">还没提交呢！</string>
+    <string name="puzzlegameinfomation" translatable="false">PuzzleGameInfomation</string>
+    <string name="giveup" translatable="false">GiveUp</string>
 </resources>
