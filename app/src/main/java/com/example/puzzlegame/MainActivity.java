@@ -7,13 +7,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.SystemClock;
 import android.view.View;
 import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.AnimationUtils;
-import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -21,7 +16,6 @@ import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.example.puzzlegame.databinding.ActivityMainBinding;
 import com.example.puzzlegame.models.ImagePiece;
@@ -84,12 +78,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //private ImageView p1,p2,p3,p4,p5,p6,p7,p8,p9,pout;
     private ArrayList<ImageView> divide;
 
-    private Button confirmSelection ;
-    private Button submitPuzzle;
-    private Button giveUpPuzzle;
     private TextView timeCounter;
     private TextView resultPrinter;
     private TextView infoPrinter;
+
+    private Button confirmSelection;
+    private Button submitPuzzle;
+    private Button giveUpPuzzle;
 
     // 九宫格对应的搜索方向
     ArrayList<int[]> dirs;
@@ -105,13 +100,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Calendar startTime;
     // 计时器, 用于正向计时
     private Timer timer;
-    // Handler
-    Handler handler;
     // R.drawable._null对应的Bitmap
     private Bitmap nullBitmap;
     // animation
     RotateAnimation anim= new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f,
-            Animation.RELATIVE_TO_SELF, 0.5f);;
+            Animation.RELATIVE_TO_SELF, 0.5f);
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -120,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         // 处理这里的this红色波浪线报错: lifecycle 更新到2.2.0版本
-        MainViewModel model = new ViewModelProvider(this).get(MainViewModel.class);
+//        MainViewModel model = new ViewModelProvider(this).get(MainViewModel.class);
         com.example.puzzlegame.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -129,7 +122,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         nullBitmap = BitmapFactory.decodeResource(res, R.drawable._null);
 
         // source组件初始化
-        source = new ArrayList<ImageView>();
+        //private ImageView s1,s2,s3,s4,s5,s6,s7,s8;
+        source = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
             int id = getResources().getIdentifier("source"+(i+1),"id", getPackageName());
             source.add(findViewById(id));
@@ -141,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // 拼图组件初始化
         // 所有的tag先初始化为nullBitmap
-        divide = new ArrayList<ImageView>();
+        divide = new ArrayList<>();
         for (int i = 0; i < 9; i++) {
             int id = getResources().getIdentifier("img"+(i+1),"id", getPackageName());
             divide.add(findViewById(id));
@@ -159,9 +153,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         divideList[9]=R.id.imgout;
 
         // 绑定组件
-        confirmSelection = binding.startPuzzle;
-        submitPuzzle = binding.endPuzzle;
-        giveUpPuzzle = binding.giveUpGame;
+        Button confirmSelection = binding.startPuzzle;
+        Button submitPuzzle = binding.endPuzzle;
+        Button giveUpPuzzle = binding.giveUpGame;
         timeCounter = binding.CounterTime;
         resultPrinter = binding.puzzleResult;
         infoPrinter = binding.puzzleInfo;
@@ -236,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             runOnUiThread(() -> {
                                 targetView.setImageDrawable(
                                         new BitmapDrawable(getResources(), (Bitmap) view.getTag()));
-                                targetView.setTag((Bitmap) view.getTag());
+                                targetView.setTag(view.getTag());
                                 // 当前的view设为nullBitmap
                                 view.setImageDrawable(
                                         new BitmapDrawable(getResources(),nullBitmap));
@@ -399,7 +393,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             int divideInd = Util.useLoop(divideList,viewID);
             if(sourceInd >= 0){
                 // 点击的是source里面的图片
-                RotateAnimation anim = new RotateAnimation(0.0f, 360.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
                 updateDivideImages(findViewById(viewID));
             }else if(divideInd >= 0){
                 // 点击的是拼图框里面的图片
