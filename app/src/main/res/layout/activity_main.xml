@@ -51,7 +51,9 @@
                 android:paddingLeft="2dp"
                 android:paddingTop="2dp"
                 android:paddingEnd="2dp"
-                android:paddingRight="2dp" />
+                android:paddingRight="2dp"
+                android:duration="700"
+                android:fromDegrees="0" android:toDegrees="360"/>
 
             <ImageView
                 android:id="@+id/img2"
@@ -65,7 +67,9 @@
                 android:paddingLeft="2dp"
                 android:paddingTop="2dp"
                 android:paddingEnd="2dp"
-                android:paddingRight="2dp"/>
+                android:paddingRight="2dp"
+                android:duration="700"
+                android:fromDegrees="0" android:toDegrees="360"/>
 
             <ImageView
                 android:id="@+id/img3"
@@ -78,7 +82,9 @@
                 android:paddingLeft="2dp"
                 android:paddingTop="2dp"
                 android:paddingEnd="2dp"
-                android:paddingRight="2dp"/>
+                android:paddingRight="2dp"
+                android:duration="700"
+                android:fromDegrees="0" android:toDegrees="360"/>
         </TableRow>
 
         <TableRow
@@ -97,7 +103,9 @@
                 android:paddingLeft="2dp"
                 android:paddingTop="2dp"
                 android:paddingEnd="2dp"
-                android:paddingRight="2dp"/>
+                android:paddingRight="2dp"
+                android:duration="700"
+                android:fromDegrees="0" android:toDegrees="360"/>
 
             <ImageView
                 android:id="@+id/img5"
@@ -111,7 +119,9 @@
                 android:paddingLeft="2dp"
                 android:paddingTop="2dp"
                 android:paddingEnd="2dp"
-                android:paddingRight="2dp"/>
+                android:paddingRight="2dp"
+                android:duration="700"
+                android:fromDegrees="0" android:toDegrees="360"/>
 
             <ImageView
                 android:id="@+id/img6"
@@ -124,7 +134,9 @@
                 android:paddingLeft="2dp"
                 android:paddingTop="2dp"
                 android:paddingEnd="2dp"
-                android:paddingRight="2dp"/>
+                android:paddingRight="2dp"
+                android:duration="700"
+                android:fromDegrees="0" android:toDegrees="360"/>
 
         </TableRow>
 
@@ -142,7 +154,9 @@
                 android:paddingLeft="2dp"
                 android:paddingTop="2dp"
                 android:paddingEnd="2dp"
-                android:paddingRight="2dp"/>
+                android:paddingRight="2dp"
+                android:duration="700"
+                android:fromDegrees="0" android:toDegrees="360"/>
 
             <ImageView
                 android:id="@+id/img8"
@@ -156,7 +170,9 @@
                 android:paddingLeft="2dp"
                 android:paddingTop="2dp"
                 android:paddingEnd="2dp"
-                android:paddingRight="2dp"/>
+                android:paddingRight="2dp"
+                android:duration="700"
+                android:fromDegrees="0" android:toDegrees="360"/>
 
             <ImageView
                 android:id="@+id/img9"
@@ -169,7 +185,9 @@
                 android:paddingLeft="2dp"
                 android:paddingTop="2dp"
                 android:paddingEnd="2dp"
-                android:paddingRight="2dp"/>
+                android:paddingRight="2dp"
+                android:duration="700"
+                android:fromDegrees="0" android:toDegrees="360"/>
 
         </TableRow>
 
@@ -191,7 +209,9 @@
                 android:paddingLeft="2dp"
                 android:paddingTop="2dp"
                 android:paddingEnd="2dp"
-                android:paddingRight="2dp"/>
+                android:paddingRight="2dp"
+                android:duration="700"
+                android:fromDegrees="0" android:toDegrees="360"/>
         </TableRow>
     </TableLayout>
 

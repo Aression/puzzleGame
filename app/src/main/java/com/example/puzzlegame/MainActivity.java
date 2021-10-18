@@ -7,7 +7,14 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -98,8 +105,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Calendar startTime;
     // 计时器, 用于正向计时
     private Timer timer;
+    // Handler
+    Handler handler;
     // R.drawable._null对应的Bitmap
     private Bitmap nullBitmap;
+    // animation
+    RotateAnimation anim= new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f,
+            Animation.RELATIVE_TO_SELF, 0.5f);;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -212,14 +224,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ImageView targetView = findViewById(divideList[searchViewInd]);
                 // 如果搜索到的目标方格是对应的nullBitmap, 允许图片移动
                 if(imageNull(targetView)){
-                    // 目标view设为当前对应的拼图块
-                    targetView.setImageDrawable(
-                            new BitmapDrawable(getResources(), (Bitmap) view.getTag()));
-                    targetView.setTag((Bitmap) view.getTag());
-                    // 当前的view设为nullBitmap
-                    view.setImageDrawable(
-                            new BitmapDrawable(getResources(),nullBitmap));
-                    view.setTag(nullBitmap);
+                    anim.reset();
+                    // 当前view先转一圈
+                    anim.setDuration(700);
+                    view.startAnimation(anim);
+                    // runOnUiThread的TimerTask 执行下一次的view更新
+
+                    timer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            runOnUiThread(() -> {
+                                targetView.setImageDrawable(
+                                        new BitmapDrawable(getResources(), (Bitmap) view.getTag()));
+                                targetView.setTag((Bitmap) view.getTag());
+                                // 当前的view设为nullBitmap
+                                view.setImageDrawable(
+                                        new BitmapDrawable(getResources(),nullBitmap));
+                                view.setTag(nullBitmap);
+                                // 重要:这里解绑定动画非常关键!
+                                view.setAnimation(null);
+                                targetView.startAnimation(anim);
+                            });
+                        }
+                        //delay 700ms, 执行一次
+                    },700); // 延时0.7秒
                 }
             }
         }
@@ -371,6 +399,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             int divideInd = Util.useLoop(divideList,viewID);
             if(sourceInd >= 0){
                 // 点击的是source里面的图片
+                RotateAnimation anim = new RotateAnimation(0.0f, 360.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
                 updateDivideImages(findViewById(viewID));
             }else if(divideInd >= 0){
                 // 点击的是拼图框里面的图片
