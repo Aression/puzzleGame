@@ -8,4 +8,13 @@ public class ImagePiece {
 
     public Bitmap bitmap = null;
 
+    public ImagePiece(int ind, Bitmap bmp){
+        this.index=ind;
+        this.bitmap=bmp;
+    }
+
+    public ImagePiece(){
+
+    }
+
 }

@@ -23,6 +23,7 @@ import com.example.puzzlegame.databinding.ActivityMainBinding;
 import com.example.puzzlegame.models.ImagePiece;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
@@ -35,11 +36,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     //将imageview组件对应的ID编入数组以方便维护
     private final int[] sourceList=new int[8];
-    private final int[] divideList=new int[10];
+    private final int[] divideList=new int[9];
 
     //private ImageView s1,s2,s3,s4,s5,s6,s7,s8;
     private ArrayList<ImageView> source;
-    //private ImageView p1,p2,p3,p4,p5,p6,p7,p8,p9,pout;
+    //private ImageView p1,p2,p3,p4,p5,p6,p7,p8,p9;
     private ArrayList<ImageView> divide;
 
     private TextView timeCounter;
@@ -52,10 +53,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     // 九宫格对应的搜索方向
     ArrayList<int[]> dirs;
-    // bitmap切割的图片列表
+    // bitmap最后一次切割的图片列表
     private List<ImagePiece> imgPieces;
-    // 最后一次所选择的图片ID, 用于在放弃时恢复拼图
-    private int lastChoseImageID;
     // 积分, 表示成功和失败的结果
     private int Credits = 0;
     // 游戏是否已经开始, 用于控制按键的有效性
@@ -77,7 +76,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         // 处理这里的this红色波浪线报错: lifecycle 更新到2.2.0版本
-//        MainViewModel model = new ViewModelProvider(this).get(MainViewModel.class);
         com.example.puzzlegame.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -86,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         nullBitmap = BitmapFactory.decodeResource(res, R.drawable._null);
 
         // source组件初始化
-        //private ImageView s1,s2,s3,s4,s5,s6,s7,s8;
+        // private ImageView s1,s2,s3,s4,s5,s6,s7,s8;
         source = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
             int id = getResources().getIdentifier("source"+(i+1),"id", getPackageName());
@@ -109,12 +107,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             divide.get(i).setTag(nullBitmap);
             divideList[i]=id;
         }
-        // 对九号部件初始化
-        divide.add(findViewById(R.id.imgout));
-        divide.get(9).setOnClickListener(this);
-        divide.get(9).setImageResource(R.drawable._null);
-        divide.get(9).setTag(nullBitmap);
-        divideList[9]=R.id.imgout;
 
         // 绑定组件
         Button confirmSelection = binding.startPuzzle;
@@ -137,24 +129,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dirs.add(new int[]{-3,1,3});
         dirs.add(new int[]{-3,1,3,-1});
         dirs.add(new int[]{-1,-3,3});
-        dirs.add(new int[]{-3,1,3});
+        dirs.add(new int[]{-3,1});
         dirs.add(new int[]{-1,-3,1});
         dirs.add(new int[]{-1,-3});
-        dirs.add(new int[]{-3});
     }
 
     @SuppressLint("SetTextI18n")
     private void updateDivideImages(ImageView view){
         // 使用view对应的源图片更新拼图框内的图片
         if(!gameStarted){
-            lastChoseImageID = (int) view.getTag();
+            int lastChoseImageID = (int) view.getTag();
             Resources res = getResources();
             Bitmap bmp = BitmapFactory.decodeResource(res, lastChoseImageID);
-            imgPieces = ImageSplitter.split(bmp,3,3);
+            // 留一个空用于交换位置. 8号位没有被更新, 仍然是null
+            imgPieces = ImageSplitter.split(bmp,3,3).subList(0,8);
             for (ImagePiece piece:imgPieces) {
                 divide.get(piece.index).setImageDrawable(new BitmapDrawable(getResources(),piece.bitmap));
                 divide.get(piece.index).setTag(piece.bitmap);
             }
+            // 在imgPieces里面加上null对应的bitmap便于后续判定
+            imgPieces.add(new ImagePiece(8,nullBitmap));
         }else{
             infoPrinter.setText("游戏尚未开始,请不要在现在选择拼图题目!");
         }
@@ -184,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if(imageNull(targetView)){
                     anim.reset();
                     // 当前view先转一圈
-                    anim.setDuration(400);
+                    anim.setDuration(300);
                     view.startAnimation(anim);
                     // runOnUiThread的TimerTask 执行下一次的view更新
 
@@ -204,8 +198,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 targetView.startAnimation(anim);
                             });
                         }
-                        //delay 400ms, 执行一次
-                    },400); // 延时0.4秒
+                        //delay 300ms, 执行一次
+                    },300);
                 }
             }
         }
@@ -214,15 +208,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private boolean judgePuzzleComplete(){
         // 点击完成拼图的时候, 判断是否执行完毕
-        // 如果存在tag与null对应的子图则直接返回false
-        for (int i = 0; i < 9; i++) {
-            if(imageNull(divide.get(i))){
-                return false;
-            }
-        }
-        // 否则判断当前组合是否对应到正确的图形组合
-        for (int i = 0; i < 9; i++) {
-            if(!Util.isEqual(imgPieces.get(i).bitmap, (Bitmap) divide.get(i).getTag())){
+        for (ImagePiece piece : imgPieces) {
+            if(!Util.isEqual(piece.bitmap,(Bitmap) divide.get(piece.index).getTag())){
                 return false;
             }
         }
@@ -240,6 +227,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     };
+
+    private void flush(){
+        /* 打乱图片
+        *  由逆序数定义可以推导出拼图有且仅有两类. 要保证拼图可还原, 只需要保证拼图类别不发生变化即可.
+        *  设拼图规模为n*m, 空白格位于mat[n-1][m-1]
+        *  根据二维数组生成一个大小为n*m的一维数组data[0]...data[n*m-1],
+        *  则令p=n+m+con, con表示这个序列的逆序数. 保持随机生成的一维数组p值奇偶不变即可.
+        * */
+        int[] indList = new int[8];
+        boolean available=false;
+        // 3*3的p=6+0=0,偶数.
+        // 生成p值同为偶数的序列
+        while(!available){
+            indList = Util.getrandomarray(8);
+            int con=0;
+            for (int i = 0; i < 8; i++) {
+                for (int j = i+1; j < 8; j++) {
+                    if(indList[i]>indList[j]) con++;
+                }
+            }
+            available = (con % 2 == 0);
+        }
+
+        System.out.println(Arrays.toString(indList));
+        // 重新组织拼图
+        for (int i = 0; i < 8; i++) {
+            int indNow = indList[i];
+            System.out.println(indNow);
+            ImagePiece piece = imgPieces.get(indNow);
+            divide.get(i).setImageDrawable(new BitmapDrawable(getResources(),piece.bitmap));
+            divide.get(i).setTag(piece.bitmap);
+        }
+    }
 
     @SuppressLint("SetTextI18n")
     private void startGame(){
@@ -264,28 +284,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             };
             //每过一秒获取一次当前的calendar,打印时间间隔.
             timer.schedule (timerTask, 1000L, 1000L);
-
-            // 打乱图片
-            // 对于m*n的拼图，从拼图板块中任取三块做轮换，通过[(m*n)/3]^2次轮换，即可实现相当“乱”的打乱效果。
-            // 对于m=n=3的情况, 需要轮换的次数是9
-            int startInd = getRandomInt(0,5);
-            int[] indList = Util.getrandomarray(9);
-            for (int i = 0; i < 9; i++) {
-                if(indList[i]==6){
-                    int tmp=indList[6];
-                    indList[6]=6;
-                    indList[i]=tmp;
-                    break;
-                }
-            }
-
-            // 重新组织拼图
-            for (int i = 0; i < 9; i++) {
-                int indNow = indList[i];
-                ImagePiece piece = imgPieces.get(indNow);
-                divide.get(i).setImageDrawable(new BitmapDrawable(getResources(),piece.bitmap));
-                divide.get(i).setTag(piece.bitmap);
-            }
+            //打乱图片
+            flush();
         }
     }
 
@@ -312,14 +312,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // 放弃本次游戏, 统计信息并获得惩罚: credits-1
         if(gameStarted){
             // 恢复拼图
-            Resources res = getResources();
-            Bitmap bmp = BitmapFactory.decodeResource(res, lastChoseImageID);
-            List<ImagePiece> imgPieces = ImageSplitter.split(bmp,3,3);
             for (ImagePiece piece:imgPieces) {
                 divide.get(piece.index).setImageDrawable(new BitmapDrawable(getResources(),piece.bitmap));
             }
-            divide.get(9).setImageResource(R.drawable._null);
-            divide.get(9).setTag(nullBitmap);
             // 清除当前状态
             gameStarted = false;
             // 清空计时队列
