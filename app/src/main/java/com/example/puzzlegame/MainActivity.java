@@ -48,21 +48,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button giveUpPuzzle;
 
     // 九宫格对应的搜索方向
-    ArrayList<int[]> dirs;
+    private ArrayList<int[]> dirs;
     // bitmap最后一次切割的图片列表
     private List<ImagePiece> imgPieces;
     // 积分, 表示成功和失败的结果
-    private int Credits = 0;
+    private int Credits;
     // 游戏是否已经开始, 用于控制按键的有效性
-    private boolean gameStarted = false;
+    private boolean gameStarted;
     // 一次游戏的开始时间
     private Calendar startTime;
     // 计时器, 用于正向计时
     private Timer timer;
     // R.drawable._null对应的Bitmap
     private Bitmap nullBitmap;
-    // animation
-    RotateAnimation anim= new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f,
+    // ImageView使用的旋转动画
+    private final RotateAnimation anim= new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f,
             Animation.RELATIVE_TO_SELF, 0.5f);
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -105,9 +105,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         // 绑定组件
-        Button confirmSelection = binding.startPuzzle;
-        Button submitPuzzle = binding.endPuzzle;
-        Button giveUpPuzzle = binding.giveUpGame;
+        confirmSelection = binding.startPuzzle;
+        submitPuzzle = binding.endPuzzle;
+        giveUpPuzzle = binding.giveUpGame;
         timeCounter = binding.CounterTime;
         resultPrinter = binding.puzzleResult;
         infoPrinter = binding.puzzleInfo;
@@ -128,6 +128,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dirs.add(new int[]{-3,1});
         dirs.add(new int[]{-1,-3,1});
         dirs.add(new int[]{-1,-3});
+
+        // 初始化状态
+        Credits = 0;
+        gameStarted=false;
     }
 
     @SuppressLint("SetTextI18n")
@@ -213,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     // 定义主线程体
-    Runnable timerRunnable=new Runnable() {
+    private final Runnable timerRunnable=new Runnable() {
         public volatile boolean exit = false;
         @Override
         public void run() {
@@ -236,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // 3*3的p=6+0=0,偶数.
         // 生成p值同为偶数的序列
         while(!available){
-            indList = Util.getrandomarray(8);
+            indList = Util.getRandomArray(8);
             int con=0;
             for (int i = 0; i < 8; i++) {
                 for (int j = i+1; j < 8; j++) {

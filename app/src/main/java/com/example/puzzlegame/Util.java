@@ -22,7 +22,7 @@ class Util{
     }
 
     //得到数组内容从0到log-1的随机数组
-    public static int[] getrandomarray(int log){
+    public static int[] getRandomArray(int log){
         int[] result = new int[log];
         for (int i = 0; i < log; i++) {
             result[i] = i;
