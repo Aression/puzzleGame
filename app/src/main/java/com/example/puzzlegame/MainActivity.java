@@ -1,7 +1,5 @@
 package com.example.puzzlegame;
 
-import static com.example.puzzlegame.Util.*;
-
 import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -26,10 +24,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
