@@ -1,5 +1,7 @@
 package com.example.puzzlegame;
 
+import static com.example.puzzlegame.Util.*;
+
 import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -23,49 +25,11 @@ import com.example.puzzlegame.models.ImagePiece;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-class Util{
-    public static boolean isEqual(Bitmap expectedBitmap, Bitmap actualBitmap) {
-        // 判断两个Bitmap是否相等
-        int nonMatchingPixels = 0;
-        int allowedMaxNonMatchPixels = 10;
-        if(expectedBitmap == null || actualBitmap == null) {return false;}
-        int[] expectedBmpPixels = new int[expectedBitmap.getWidth() * expectedBitmap.getHeight()];
-        expectedBitmap.getPixels(expectedBmpPixels, 0, expectedBitmap.getWidth(), 0, 0, expectedBitmap.getWidth(), expectedBitmap.getHeight());
-        int[] actualBmpPixels = new int[actualBitmap.getWidth() * actualBitmap.getHeight()];
-        actualBitmap.getPixels(actualBmpPixels, 0, actualBitmap.getWidth(), 0, 0, actualBitmap.getWidth(), actualBitmap.getHeight());
-        if (expectedBmpPixels.length != actualBmpPixels.length) {return false;}
-        for (int i = 0; i < expectedBmpPixels.length; i++) {
-            if (expectedBmpPixels[i] != actualBmpPixels[i]) {nonMatchingPixels++;}
-        }
-        return nonMatchingPixels <= allowedMaxNonMatchPixels;
-    }
 
-    //得到数组内容从0到log-1的随机数组
-    public static int[] getrandomarray(int log){
-        int[] result = new int[log];
-        for (int i = 0; i < log; i++) {
-            result[i] = i;
-        }
-        for (int i = 0; i < log; i++) {
-            int random = (int) (log * Math.random());
-            int temp = result[i];
-            result[i] = result[random];
-            result[random] = temp;
-        }
-        return result;
-    }
-
-    // 数组循环找下标
-    public static int useLoop(int[] arr, int targetValue) {
-        for (int i = 0; i < arr.length; i++) {
-            if(arr[i]==targetValue) return i;
-        }
-        return -1;
-    }
-}
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -192,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 divide.get(piece.index).setTag(piece.bitmap);
             }
         }else{
-            infoPrinter.setText("game has already started! please don't change image now.");
+            infoPrinter.setText("游戏尚未开始,请不要在现在选择拼图题目!");
         }
     }
 
@@ -205,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void performPuzzleMove(ImageView view){
         // 点击拼图框内的图片时, 执行图片的移动操作
         if(!gameStarted){
-            infoPrinter.setText("game not started! please don't solve puzzle now.");
+            infoPrinter.setText("游戏尚未开始,请不要在现在解题!");
         }else if(!imageNull(view)){
             // 当图片非空的时候执行移动
             int indNow = Util.useLoop(divideList,view.getId());
@@ -220,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if(imageNull(targetView)){
                     anim.reset();
                     // 当前view先转一圈
-                    anim.setDuration(700);
+                    anim.setDuration(400);
                     view.startAnimation(anim);
                     // runOnUiThread的TimerTask 执行下一次的view更新
 
@@ -240,8 +204,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 targetView.startAnimation(anim);
                             });
                         }
-                        //delay 700ms, 执行一次
-                    },700); // 延时0.7秒
+                        //delay 400ms, 执行一次
+                    },400); // 延时0.4秒
                 }
             }
         }
@@ -302,7 +266,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             timer.schedule (timerTask, 1000L, 1000L);
 
             // 打乱图片
-            // 生成随机的0-8的数组, 将6号位设置为特定拼图, 使的游戏可以完成
+            // 对于m*n的拼图，从拼图板块中任取三块做轮换，通过[(m*n)/3]^2次轮换，即可实现相当“乱”的打乱效果。
+            // 对于m=n=3的情况, 需要轮换的次数是9
+            int startInd = getRandomInt(0,5);
             int[] indList = Util.getrandomarray(9);
             for (int i = 0; i < 9; i++) {
                 if(indList[i]==6){
